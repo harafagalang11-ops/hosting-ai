@@ -113,7 +113,7 @@ Pada server Linux, Laravel Scheduler perlu dipanggil secara berkala melalui cron
 Atur nilai yang diperlukan melalui file `.env`. Jangan menaruh token, password, API key, atau kredensial pribadi ke dalam source code maupun repository.
 
 - **Telegram:** isi konfigurasi bot token dan chat ID sesuai variabel yang dibaca oleh `config/services.php`.
-- **Hermes Agent:** Hermes harus terpasang pada mesin yang menjalankan aplikasi dan path executable perlu disesuaikan dengan lingkungan tersebut.
+- **Hermes Agent:** Hermes harus terpasang pada mesin yang menjalankan aplikasi. Atur variabel `HERMES_BINARY` pada `.env` jika executable tidak tersedia melalui `PATH` (contoh: `HERMES_BINARY=/path/ke/hermes`).
 - **Direktori laporan dan status monitoring:** sesuaikan konfigurasi pada `config/hosting.php` dengan lokasi penyimpanan yang tersedia.
 
 Jangan gunakan kredensial produksi pada lingkungan pengembangan. Gunakan akun dan layanan uji sampai konfigurasi operasional telah diverifikasi.
