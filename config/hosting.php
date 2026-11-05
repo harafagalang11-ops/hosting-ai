@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'hermes_binary' => env('HERMES_BINARY', 'hermes'),
+
     'status_path' => env(
         'HOSTING_STATUS_PATH',
         env('HOME') . '/.hermes/state/hosting-monitor-status'
