@@ -15,6 +15,7 @@ class HostingNotification extends Model
         'title',
         'message',
         'checked_at',
+        'report_date',
         'telegram_sent_at',
         'telegram_error',
         'telegram_attempts',
@@ -31,6 +32,7 @@ class HostingNotification extends Model
     {
         return [
             'checked_at' => 'datetime',
+            'report_date' => 'date',
             'telegram_sent_at' => 'datetime',
             'telegram_next_attempt_at' => 'datetime',
             'read_at' => 'datetime',

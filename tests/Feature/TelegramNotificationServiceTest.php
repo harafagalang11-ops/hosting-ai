@@ -124,7 +124,7 @@ class TelegramNotificationServiceTest extends TestCase
 
         $notification = $this->createNotification();
 
-        $lock = Cache::lock('telegram-notification-' . $notification->id, 60);
+        $lock = Cache::lock('telegram-notification-'.$notification->id, 60);
 
         $this->assertTrue($lock->get());
 

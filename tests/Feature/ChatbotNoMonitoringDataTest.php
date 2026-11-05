@@ -27,7 +27,8 @@ class ChatbotNoMonitoringDataTest extends TestCase
 
         $this->app->instance(
             HermesRunner::class,
-            new class extends HermesRunner {
+            new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     if (! str_contains($prompt, 'DATA BELUM CUKUP')) {
@@ -39,10 +40,10 @@ class ChatbotNoMonitoringDataTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg(
+                        'echo '.escapeshellarg(
                             'Belum tersedia data monitoring yang cukup untuk memastikan kondisi server. '
-                            . 'Lakukan pemeriksaan monitoring terlebih dahulu.'
-                        ) . ';',
+                            .'Lakukan pemeriksaan monitoring terlebih dahulu.'
+                        ).';',
                     ]);
 
                     $process->run();
@@ -62,7 +63,7 @@ class ChatbotNoMonitoringDataTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonFragment([
                 'reply' => 'Belum tersedia data monitoring yang cukup untuk memastikan kondisi server. '
-                    . 'Lakukan pemeriksaan monitoring terlebih dahulu.',
+                    .'Lakukan pemeriksaan monitoring terlebih dahulu.',
             ]);
     }
 }

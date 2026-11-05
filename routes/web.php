@@ -1,40 +1,39 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Artisan;
-use App\Models\MonitoringLog;
-use App\Models\Website;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WebsiteController;
+use App\Models\MonitoringLog;
+use App\Models\Website;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
-if (!function_exists('getHostingMonitoring')) {
-function getHostingMonitoring()
-{
-    $websites = config('hosting.websites', []);
-    $statusPath = config('hosting.status_path');
-    $monitoring = [];
+if (! function_exists('getHostingMonitoring')) {
+    function getHostingMonitoring()
+    {
+        $websites = config('hosting.websites', []);
+        $statusPath = config('hosting.status_path');
+        $monitoring = [];
 
-    foreach ($websites as $name => $website) {
-        $file = $statusPath . '/' . $website['file'];
-        $status = file_exists($file)
-            ? strtoupper(trim(file_get_contents($file)))
-            : 'UNKNOWN';
+        foreach ($websites as $name => $website) {
+            $file = $statusPath.'/'.$website['file'];
+            $status = file_exists($file)
+                ? strtoupper(trim(file_get_contents($file)))
+                : 'UNKNOWN';
 
-        $monitoring[] = [
-            'name' => $name,
-            'url' => $website['url'],
-            'status' => $status,
-        ];
+            $monitoring[] = [
+                'name' => $name,
+                'url' => $website['url'],
+                'status' => $status,
+            ];
+        }
+
+        return $monitoring;
     }
-
-    return $monitoring;
-}
 }
 
 // Route publik
@@ -82,7 +81,7 @@ Route::middleware('auth')->group(function () {
             '30d' => 24 * 30,
         ];
 
-        if (!array_key_exists($chartRange, $rangeHours)) {
+        if (! array_key_exists($chartRange, $rangeHours)) {
             $chartRange = '24h';
         }
 
@@ -118,12 +117,13 @@ Route::middleware('auth')->group(function () {
                 ->where('checked_at', '>=', now('Asia/Jakarta')->subHours(24)->utc())
                 ->count();
 
-            if (!$latest) {
+            if (! $latest) {
                 $healthScores[$website->name] = [
                     'score' => null,
                     'label' => 'Data Belum Cukup',
                     'incident_count' => $incidentCount,
                 ];
+
                 continue;
             }
 
@@ -262,6 +262,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/riwayat', function () {
         $logs = MonitoringLog::latest('checked_at')->paginate(20);
+
         return view('history', compact('logs'));
     })->name('history');
 
@@ -291,7 +292,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/theme', [SettingsController::class, 'updateTheme'])
         ->name('settings.theme');
 });
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/websites', [WebsiteController::class, 'index'])->name('websites.index');

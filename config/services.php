@@ -1,11 +1,13 @@
 <?php
 
 return [
+    'hermes' => [
+        'executable' => env('HERMES_EXECUTABLE', 'hermes'),
+    ],
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         'chat_id' => env('TELEGRAM_HOME_CHANNEL'),
     ],
-
 
     /*
     |--------------------------------------------------------------------------

@@ -4,13 +4,15 @@ namespace App\Console\Commands;
 
 use App\Models\Website;
 use App\Services\HostingStatusNotificationService;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-#[\Illuminate\Console\Attributes\Signature('hosting:refresh-monitoring')]
-#[\Illuminate\Console\Attributes\Description('Memeriksa semua website aktif yang terdaftar')]
+#[Signature('hosting:refresh-monitoring')]
+#[Description('Memeriksa semua website aktif yang terdaftar')]
 class RefreshHostingMonitoring extends Command
 {
     public function handle(): int
@@ -21,6 +23,7 @@ class RefreshHostingMonitoring extends Command
 
         if ($websites->isEmpty()) {
             $this->warn('Tidak ada website aktif untuk diperiksa.');
+
             return self::SUCCESS;
         }
 
@@ -32,6 +35,7 @@ class RefreshHostingMonitoring extends Command
 
             if ($validationError !== null) {
                 $this->warn("{$name}: {$validationError}");
+
                 continue;
             }
 
@@ -62,15 +66,15 @@ class RefreshHostingMonitoring extends Command
                 if ($httpCode >= 300 && $httpCode < 400) {
                     $redirectLocation = $response->header('Location');
 
-                    if (!empty($redirectLocation)) {
-                        $detail .= ' Redirect menuju: ' . $redirectLocation;
+                    if (! empty($redirectLocation)) {
+                        $detail .= ' Redirect menuju: '.$redirectLocation;
                     } else {
                         $detail .= ' Header Location tidak tersedia.';
                     }
                 }
             } catch (Throwable $e) {
                 $responseTime = round(microtime(true) - $startedAt, 3);
-                $detail = 'Koneksi gagal: ' . $e->getMessage();
+                $detail = 'Koneksi gagal: '.$e->getMessage();
 
                 Log::warning('Hosting refresh gagal', [
                     'website_id' => $website->id,
@@ -101,12 +105,13 @@ class RefreshHostingMonitoring extends Command
                 );
 
             $this->line(
-                "{$name}: {$status} | HTTP " .
-                ($httpCode ?? '-') . " | {$responseTime} detik"
+                "{$name}: {$status} | HTTP ".
+                ($httpCode ?? '-')." | {$responseTime} detik"
             );
         }
 
         $this->info('Pemeriksaan website aktif selesai.');
+
         return self::SUCCESS;
     }
 
@@ -122,7 +127,7 @@ class RefreshHostingMonitoring extends Command
         $host = strtolower(rtrim($parts['host'] ?? '', '.'));
         $port = $parts['port'] ?? null;
 
-        if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
+        if (! in_array($scheme, ['http', 'https'], true) || $host === '') {
             return 'Hanya URL HTTP/HTTPS yang diizinkan.';
         }
 
@@ -130,13 +135,13 @@ class RefreshHostingMonitoring extends Command
             return 'URL dengan informasi login tidak diizinkan.';
         }
 
-        if ($port !== null && !in_array($port, [80, 443], true)) {
+        if ($port !== null && ! in_array($port, [80, 443], true)) {
             return 'Hanya port 80 dan 443 yang diizinkan.';
         }
 
         if (
             filter_var($host, FILTER_VALIDATE_IP) ||
-            !filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
+            ! filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
             $host === 'localhost' ||
             str_ends_with($host, '.localhost') ||
             str_ends_with($host, '.local') ||
@@ -155,11 +160,11 @@ class RefreshHostingMonitoring extends Command
         $addresses = [];
 
         foreach ($records as $record) {
-            if (!empty($record['ip'])) {
+            if (! empty($record['ip'])) {
                 $addresses[] = $record['ip'];
             }
 
-            if (!empty($record['ipv6'])) {
+            if (! empty($record['ipv6'])) {
                 $addresses[] = $record['ipv6'];
             }
         }

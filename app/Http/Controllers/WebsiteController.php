@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Website;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class WebsiteController extends Controller
 {
@@ -50,7 +51,7 @@ class WebsiteController extends Controller
 
     public function toggle(Website $website)
     {
-        $website->update(['is_active' => !$website->is_active]);
+        $website->update(['is_active' => ! $website->is_active]);
 
         return back()->with('success', 'Status website berhasil diperbarui.');
     }
@@ -80,14 +81,14 @@ class WebsiteController extends Controller
         $scheme = strtolower($parts['scheme'] ?? '');
         $host = strtolower(rtrim($parts['host'] ?? '', '.'));
 
-        if (!in_array($scheme, ['http', 'https'], true) ||
+        if (! in_array($scheme, ['http', 'https'], true) ||
             $host === '' ||
             in_array($host, ['localhost'], true) ||
             str_ends_with($host, '.localhost') ||
             str_ends_with($host, '.local') ||
             str_ends_with($host, '.internal') ||
             str_ends_with($host, '.test')) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'url' => 'Gunakan URL HTTP/HTTPS dengan domain publik yang valid.',
             ]);
         }
@@ -100,7 +101,7 @@ class WebsiteController extends Controller
             );
 
             if ($publicIp === false) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'url' => 'Alamat IP lokal atau khusus tidak diizinkan.',
                 ]);
             }

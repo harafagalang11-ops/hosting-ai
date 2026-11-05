@@ -6,25 +6,29 @@ use App\Models\MonitoringLog;
 use App\Models\Website;
 use App\Services\HostingStatusNotificationService;
 use Carbon\Carbon;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[\Illuminate\Console\Attributes\Signature('app:sync-hermes-monitoring')]
-#[\Illuminate\Console\Attributes\Description('Sinkronisasi hasil monitoring Hermes ke database Laravel')]
+#[Signature('app:sync-hermes-monitoring')]
+#[Description('Sinkronisasi hasil monitoring Hermes ke database Laravel')]
 class SyncHermesMonitoring extends Command
 {
     public function handle(): int
     {
-        $reportPath = env('HOME') . '/Documents/HostingVault/Cek Hosting Terbaru.md';
+        $reportPath = env('HOME').'/Documents/HostingVault/Cek Hosting Terbaru.md';
 
-        if (!file_exists($reportPath)) {
-            $this->error('File laporan Hermes tidak ditemukan: ' . $reportPath);
+        if (! file_exists($reportPath)) {
+            $this->error('File laporan Hermes tidak ditemukan: '.$reportPath);
+
             return self::FAILURE;
         }
 
         $content = file_get_contents($reportPath);
 
-        if (!preg_match('/Waktu:\s*(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2})/', $content, $timeMatch)) {
+        if (! preg_match('/Waktu:\s*(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2})/', $content, $timeMatch)) {
             $this->error('Waktu pemeriksaan tidak ditemukan dalam laporan.');
+
             return self::FAILURE;
         }
 
@@ -43,6 +47,7 @@ class SyncHermesMonitoring extends Command
 
         if (empty($matches)) {
             $this->error('Tidak ada data website yang dapat dibaca dari laporan.');
+
             return self::FAILURE;
         }
 
@@ -80,6 +85,7 @@ class SyncHermesMonitoring extends Command
 
             if ($existsQuery->exists()) {
                 $skipped++;
+
                 continue;
             }
 

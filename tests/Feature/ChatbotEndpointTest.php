@@ -3,9 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\ChatMessage;
-use App\Models\MonitoringLog;
-use App\Models\Website;
 use App\Models\User;
+use App\Models\Website;
 use App\Services\HermesRunner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\Process\Process;
@@ -52,7 +51,8 @@ class ChatbotEndpointTest extends TestCase
 
         $this->app->instance(
             HermesRunner::class,
-            new class extends HermesRunner {
+            new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     $process = new Process([
@@ -78,9 +78,9 @@ class ChatbotEndpointTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonFragment([
                 'reply' => "Analisis tren response time berdasarkan data monitoring Laravel:\n"
-                    . "Google: rata-rata 5 pemeriksaan sebelumnya 1.000 detik"
-                    . ", rata-rata 5 pemeriksaan terbaru 0.500 detik"
-                    . ", jumlah sampel 10, tren MEMBAIK.",
+                    .'Google: rata-rata 5 pemeriksaan sebelumnya 1.000 detik'
+                    .', rata-rata 5 pemeriksaan terbaru 0.500 detik'
+                    .', jumlah sampel 10, tren MEMBAIK.',
             ]);
 
         $this->assertDatabaseHas('chat_messages', [

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MonitoringLog;
 use App\Models\ChatMessage;
-use App\Services\MonitoringTrendService;
+use App\Models\MonitoringLog;
+use App\Models\Website;
 use App\Services\HermesRunner;
+use App\Services\MonitoringTrendService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class ChatbotController extends Controller
@@ -35,7 +38,7 @@ class ChatbotController extends Controller
         ]);
 
         // Daftar website aktif berasal dari database.
-        $websites = \App\Models\Website::where('is_active', true)
+        $websites = Website::where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -45,7 +48,7 @@ class ChatbotController extends Controller
                 ->latest('checked_at')
                 ->first();
 
-            return !$latest || $latest->checked_at->lt(now('UTC')->subMinutes(15));
+            return ! $latest || $latest->checked_at->lt(now('UTC')->subMinutes(15));
         });
 
         if ($refreshNeeded) {
@@ -58,8 +61,8 @@ class ChatbotController extends Controller
             $refresh->setTimeout(60);
             $refresh->run();
 
-            if (!$refresh->isSuccessful()) {
-                \Illuminate\Support\Facades\Log::warning(
+            if (! $refresh->isSuccessful()) {
+                Log::warning(
                     'Refresh monitoring otomatis gagal',
                     ['error' => $refresh->getErrorOutput()]
                 );
@@ -111,7 +114,7 @@ class ChatbotController extends Controller
                         'response_time' => round($responseTime, 3),
                         'rata_rata_pembanding' => round($baselineAverage, 3),
                         'waktu_pemeriksaan' => $record->checked_at
-                            ? $record->checked_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') . ' WIB'
+                            ? $record->checked_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s').' WIB'
                             : null,
                         'status' => $record->status,
                         'http_code' => $record->http_code,
@@ -138,7 +141,7 @@ class ChatbotController extends Controller
                 'http_code' => $latest?->http_code,
                 'response_time' => $latest?->response_time,
                 'updated_at' => $updatedAt
-                    ? $updatedAt->format('Y-m-d H:i:s') . ' WIB'
+                    ? $updatedAt->format('Y-m-d H:i:s').' WIB'
                     : null,
             ];
         }
@@ -154,8 +157,8 @@ class ChatbotController extends Controller
         $summaryData = $summaryRows
             ->groupBy(function ($row) {
                 return $row->website_id !== null
-                    ? 'website:' . $row->website_id
-                    : 'other:' . $row->website_name;
+                    ? 'website:'.$row->website_id
+                    : 'other:'.$row->website_name;
             })
             ->map(function ($rows) {
                 $counts = ['NORMAL' => 0, 'WARNING' => 0, 'GANGGUAN' => 0];
@@ -201,10 +204,10 @@ class ChatbotController extends Controller
                 $data = $log->toArray();
                 $data['kategori'] = 'MONITORING AKTUAL';
 
-                if (!empty($data['checked_at'])) {
+                if (! empty($data['checked_at'])) {
                     $data['checked_at'] = $log->checked_at
                         ->timezone('Asia/Jakarta')
-                        ->format('Y-m-d H:i:s') . ' WIB';
+                        ->format('Y-m-d H:i:s').' WIB';
                 }
 
                 $latestData[] = $data;
@@ -230,10 +233,10 @@ class ChatbotController extends Controller
                 $data = $log->toArray();
                 $data['kategori'] = 'DATA SIMULASI/LAINNYA';
 
-                if (!empty($data['checked_at'])) {
+                if (! empty($data['checked_at'])) {
                     $data['checked_at'] = $log->checked_at
                         ->timezone('Asia/Jakarta')
-                        ->format('Y-m-d H:i:s') . ' WIB';
+                        ->format('Y-m-d H:i:s').' WIB';
                 }
 
                 $latestData[] = $data;
@@ -254,10 +257,10 @@ class ChatbotController extends Controller
                 ? 'MONITORING AKTUAL'
                 : 'DATA SIMULASI/LAINNYA';
 
-            if (!empty($data['checked_at'])) {
+            if (! empty($data['checked_at'])) {
                 $data['checked_at'] = $log->checked_at
                     ->timezone('Asia/Jakarta')
-                    ->format('Y-m-d H:i:s') . ' WIB';
+                    ->format('Y-m-d H:i:s').' WIB';
             }
 
             return $data;
@@ -285,9 +288,9 @@ class ChatbotController extends Controller
                     ? 'Hosting AI Assistant'
                     : 'Pengguna';
 
-                return $role . ': ' . $chat->message;
+                return $role.': '.$chat->message;
             })
-            ->implode("\\n");
+            ->implode('\\n');
 
         if ($conversationHistory === '') {
             $conversationHistory = 'Belum ada riwayat percakapan sebelumnya.';
@@ -296,8 +299,8 @@ class ChatbotController extends Controller
         // Baca laporan Obsidian sesuai tanggal yang diminta.
         $reportDirectory = config('hosting.report_directory');
         $dailyReportFiles = array_merge(
-            glob($reportDirectory . '/*.md') ?: [],
-            glob(dirname($reportDirectory) . '/Riwayat Monitoring/*.md') ?: []
+            glob($reportDirectory.'/*.md') ?: [],
+            glob(dirname($reportDirectory).'/Riwayat Monitoring/*.md') ?: []
         );
         $dailyReportFiles = array_values(array_unique($dailyReportFiles));
         rsort($dailyReportFiles);
@@ -311,12 +314,12 @@ class ChatbotController extends Controller
         $requestedDates = array_values(array_unique($dateMatches[0]));
         $dailyReports = [];
 
-        if (!empty($requestedDates)) {
+        if (! empty($requestedDates)) {
             foreach ($requestedDates as $requestedDate) {
                 $matchingFiles = array_filter(
                     $dailyReportFiles,
                     fn ($file) => preg_match(
-                        '/^' . preg_quote($requestedDate, '/') . '(?:\.md|[_-].*\.md)$/',
+                        '/^'.preg_quote($requestedDate, '/').'(?:\.md|[_-].*\.md)$/',
                         basename($file)
                     )
                 );
@@ -336,8 +339,8 @@ class ChatbotController extends Controller
 
             if (empty($dailyReports)) {
                 $dailyReports = 'Laporan untuk tanggal yang diminta ('
-                    . implode(', ', $requestedDates)
-                    . ') tidak ditemukan di direktori laporan harian Obsidian.';
+                    .implode(', ', $requestedDates)
+                    .') tidak ditemukan di direktori laporan harian Obsidian.';
             }
         } else {
             foreach (array_slice($dailyReportFiles, 0, 7) as $reportFile) {
@@ -359,10 +362,10 @@ class ChatbotController extends Controller
 
         $prompt = "Kamu adalah Hosting AI Assistant untuk membantu analisis dan pengelolaan hosting.
 
-RIWAYAT PERCAKAPAN SEBELUMNYA:\n" . $conversationHistory . "\n\nDATA LAPORAN HARIAN OBSIDIAN:
-" . (is_array($dailyReports)
+RIWAYAT PERCAKAPAN SEBELUMNYA:\n".$conversationHistory."\n\nDATA LAPORAN HARIAN OBSIDIAN:
+".(is_array($dailyReports)
     ? json_encode($dailyReports, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-    : $dailyReports) . "
+    : $dailyReports).'
 
 Gunakan laporan harian untuk pertanyaan berdasarkan tanggal. Sebutkan nama file sebagai sumber. Jika laporan tanggal yang diminta tidak tersedia, nyatakan bahwa laporan tidak ditemukan. Jangan menganggap laporan lama sebagai status terkini.
 
@@ -384,7 +387,7 @@ ATURAN PRIORITAS DATA MONITORING:
 - Jika data tren tidak tersedia atau jumlah sampel tidak mencukupi, nyatakan bahwa tren belum dapat dipastikan.
 
 DATA MONITORING:
-" . json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "
+'.json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."
 
 ATURAN KHUSUS ANALISIS LAPORAN BERDASARKAN TANGGAL:
 - Jika pengguna meminta analisis atau perbandingan laporan berdasarkan tanggal, gunakan hanya isi laporan harian yang tanggalnya diminta.
@@ -577,11 +580,11 @@ KETENTUAN BATAS KESIMPULAN KUOTA DAN PERTUMBUHAN:
 - Jangan menyatakan SELECT pasti atau umumnya tetap berjalan ketika kuota mencapai 100%. Operasi baca dapat tetap berjalan pada kondisi tertentu, tetapi juga dapat terdampak jika disk fisik, temporary storage, layanan database, atau resource server bermasalah. Jelaskan bahwa dampak aktual bergantung pada implementasi kuota dan kondisi server.
 
 PERTANYAAN PENGGUNA:
-" . $validated['message'];
+".$validated['message'];
 
         try {
             $process = app(HermesRunner::class)->run($prompt);
-        } catch (\Symfony\Component\Process\Exception\ProcessTimedOutException $e) {
+        } catch (ProcessTimedOutException $e) {
             report($e);
 
             return response()->json([
@@ -590,10 +593,11 @@ PERTANYAAN PENGGUNA:
             ], 504);
         }
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             report(new \RuntimeException(
-                'Hermes Agent gagal: ' . trim($process->getErrorOutput())
+                'Hermes Agent gagal: '.trim($process->getErrorOutput())
             ));
+
             return response()->json([
                 'success' => false,
                 'reply' => 'Hermes Agent gagal memproses pesan. Silakan coba lagi.',
@@ -609,24 +613,23 @@ PERTANYAAN PENGGUNA:
         )) {
             $trendLines = collect($trendData)->map(function ($item) {
                 $previous = $item['rata_rata_sebelumnya'] !== null
-                    ? number_format((float) $item['rata_rata_sebelumnya'], 3, '.', '') . ' detik'
+                    ? number_format((float) $item['rata_rata_sebelumnya'], 3, '.', '').' detik'
                     : 'belum tersedia';
 
                 $recent = $item['rata_rata_terbaru'] !== null
-                    ? number_format((float) $item['rata_rata_terbaru'], 3, '.', '') . ' detik'
+                    ? number_format((float) $item['rata_rata_terbaru'], 3, '.', '').' detik'
                     : 'belum tersedia';
 
                 return $item['website']
-                    . ': rata-rata 5 pemeriksaan sebelumnya ' . $previous
-                    . ', rata-rata 5 pemeriksaan terbaru ' . $recent
-                    . ', jumlah sampel ' . $item['jumlah_sampel']
-                    . ', tren ' . $item['tren'] . '.';
+                    .': rata-rata 5 pemeriksaan sebelumnya '.$previous
+                    .', rata-rata 5 pemeriksaan terbaru '.$recent
+                    .', jumlah sampel '.$item['jumlah_sampel']
+                    .', tren '.$item['tren'].'.';
             })->implode("\n");
 
             $reply = "Analisis tren response time berdasarkan data monitoring Laravel:\n"
-                . ($trendLines !== '' ? $trendLines : 'Data tren belum tersedia.');
+                .($trendLines !== '' ? $trendLines : 'Data tren belum tersedia.');
         }
-
 
         // Simpan jawaban Hermes.
         ChatMessage::create([

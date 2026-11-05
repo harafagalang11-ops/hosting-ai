@@ -40,7 +40,8 @@ class ChatbotTimeoutAnalysisTest extends TestCase
 
         $this->app->instance(
             HermesRunner::class,
-            new class extends HermesRunner {
+            new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     if (! str_contains($prompt, 'cURL error 28')) {
@@ -63,15 +64,15 @@ class ChatbotTimeoutAnalysisTest extends TestCase
                     }
 
                     $reply = 'FAKTA MONITORING: Permintaan mengalami timeout '
-                        . 'berdasarkan catatan cURL error 28. '
-                        . 'HIPOTESIS PENYEBAB: Penyebab timeout belum dapat dipastikan. '
-                        . 'REKOMENDASI PEMERIKSAAN: Periksa konektivitas jaringan, '
-                        . 'DNS, firewall, dan log terkait.';
+                        .'berdasarkan catatan cURL error 28. '
+                        .'HIPOTESIS PENYEBAB: Penyebab timeout belum dapat dipastikan. '
+                        .'REKOMENDASI PEMERIKSAAN: Periksa konektivitas jaringan, '
+                        .'DNS, firewall, dan log terkait.';
 
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg($reply) . ';',
+                        'echo '.escapeshellarg($reply).';',
                     ]);
 
                     $process->run();
@@ -90,9 +91,9 @@ class ChatbotTimeoutAnalysisTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('reply', $reply = 'FAKTA MONITORING: Permintaan mengalami timeout '
-                . 'berdasarkan catatan cURL error 28. '
-                . 'HIPOTESIS PENYEBAB: Penyebab timeout belum dapat dipastikan. '
-                . 'REKOMENDASI PEMERIKSAAN: Periksa konektivitas jaringan, '
-                . 'DNS, firewall, dan log terkait.');
+                .'berdasarkan catatan cURL error 28. '
+                .'HIPOTESIS PENYEBAB: Penyebab timeout belum dapat dipastikan. '
+                .'REKOMENDASI PEMERIKSAAN: Periksa konektivitas jaringan, '
+                .'DNS, firewall, dan log terkait.');
     }
 }

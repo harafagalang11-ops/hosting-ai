@@ -8,8 +8,10 @@ class HermesRunner
 {
     public function run(string $prompt): Process
     {
+        $executable = config('services.hermes.executable', 'hermes');
+
         $process = new Process([
-            '/Users/macbee/.local/bin/hermes',
+            $executable,
             '--safe-mode',
             '-z',
             $prompt,

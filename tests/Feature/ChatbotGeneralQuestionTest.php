@@ -35,7 +35,8 @@ class ChatbotGeneralQuestionTest extends TestCase
             'checked_at' => now('UTC'),
         ]);
 
-        $fakeHermes = new class extends HermesRunner {
+        $fakeHermes = new class extends HermesRunner
+        {
             public function run(string $prompt): Process
             {
                 if (! str_contains($prompt, 'Apa perbedaan hosting dan domain?')) {
@@ -45,10 +46,10 @@ class ChatbotGeneralQuestionTest extends TestCase
                 $process = new Process([
                     PHP_BINARY,
                     '-r',
-                    'echo ' . escapeshellarg(
+                    'echo '.escapeshellarg(
                         'Hosting adalah layanan penyimpanan dan penyajian website. '
-                        . 'Domain adalah alamat yang digunakan untuk mengakses website.'
-                    ) . ';',
+                        .'Domain adalah alamat yang digunakan untuk mengakses website.'
+                    ).';',
                 ]);
 
                 $process->run();
@@ -70,7 +71,7 @@ class ChatbotGeneralQuestionTest extends TestCase
             ->assertJsonPath(
                 'reply',
                 'Hosting adalah layanan penyimpanan dan penyajian website. '
-                . 'Domain adalah alamat yang digunakan untuk mengakses website.'
+                .'Domain adalah alamat yang digunakan untuk mengakses website.'
             );
 
         $this->assertDatabaseHas('chat_messages', [

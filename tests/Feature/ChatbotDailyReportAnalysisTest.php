@@ -21,7 +21,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
             mkdir($reportDirectory, 0777, true);
         }
 
-        $reportFile = $reportDirectory . '/2026-10-20.md';
+        $reportFile = $reportDirectory.'/2026-10-20.md';
 
         file_put_contents(
             $reportFile,
@@ -49,7 +49,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 'checked_at' => now('UTC'),
             ]);
 
-            $fakeHermes = new class extends HermesRunner {
+            $fakeHermes = new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     $requiredContent = [
@@ -66,18 +67,18 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     foreach ($requiredContent as $content) {
                         if (! str_contains($prompt, $content)) {
                             throw new \RuntimeException(
-                                'Prompt tidak memuat informasi wajib: ' . $content
+                                'Prompt tidak memuat informasi wajib: '.$content
                             );
                         }
                     }
 
                     $reply = 'Laporan 2026-10-20.md mencatat HTTP 200 '
-                        . 'dengan response time 1.520 detik.';
+                        .'dengan response time 1.520 detik.';
 
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg($reply) . ';',
+                        'echo '.escapeshellarg($reply).';',
                     ]);
 
                     $process->run();
@@ -99,7 +100,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 ->assertJsonPath(
                     'reply',
                     'Laporan 2026-10-20.md mencatat HTTP 200 '
-                    . 'dengan response time 1.520 detik.'
+                    .'dengan response time 1.520 detik.'
                 );
 
             $this->assertDatabaseHas('chat_messages', [
@@ -131,8 +132,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
             mkdir($reportDirectory, 0777, true);
         }
 
-        $requestedFile = $reportDirectory . '/2026-10-20.md';
-        $otherFile = $reportDirectory . '/2026-10-21.md';
+        $requestedFile = $reportDirectory.'/2026-10-20.md';
+        $otherFile = $reportDirectory.'/2026-10-21.md';
 
         file_put_contents($requestedFile, 'ISI KHUSUS LAPORAN 20 OKTOBER');
         file_put_contents($otherFile, 'ISI RAHASIA LAPORAN 21 OKTOBER');
@@ -158,7 +159,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 'checked_at' => now('UTC'),
             ]);
 
-            $fakeHermes = new class extends HermesRunner {
+            $fakeHermes = new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     if (! str_contains($prompt, 'ISI KHUSUS LAPORAN 20 OKTOBER')) {
@@ -172,7 +174,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg('Filter tanggal berhasil.') . ';',
+                        'echo '.escapeshellarg('Filter tanggal berhasil.').';',
                     ]);
                     $process->run();
 
@@ -206,7 +208,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
             mkdir($reportDirectory, 0777, true);
         }
 
-        $otherFile = $reportDirectory . '/2026-10-20.md';
+        $otherFile = $reportDirectory.'/2026-10-20.md';
         file_put_contents($otherFile, 'ISI LAPORAN TANGGAL LAIN');
 
         try {
@@ -230,7 +232,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 'checked_at' => now('UTC'),
             ]);
 
-            $fakeHermes = new class extends HermesRunner {
+            $fakeHermes = new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     if (! str_contains($prompt, 'Laporan untuk tanggal yang diminta (2026-10-21) tidak ditemukan')) {
@@ -244,7 +247,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg('Laporan 2026-10-21 tidak ditemukan.') . ';',
+                        'echo '.escapeshellarg('Laporan 2026-10-21 tidak ditemukan.').';',
                     ]);
                     $process->run();
 
@@ -275,7 +278,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
             mkdir($reportDirectory, 0777, true);
         }
 
-        $reportFile = $reportDirectory . '/2026-10-20_19-12-55.md';
+        $reportFile = $reportDirectory.'/2026-10-20_19-12-55.md';
         file_put_contents($reportFile, 'LAPORAN TIMESTAMP KHUSUS 20 OKTOBER');
 
         try {
@@ -299,7 +302,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 'checked_at' => now('UTC'),
             ]);
 
-            $fakeHermes = new class extends HermesRunner {
+            $fakeHermes = new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     if (! str_contains($prompt, '2026-10-20_19-12-55.md')) {
@@ -313,7 +317,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg('Laporan timestamp berhasil dibaca.') . ';',
+                        'echo '.escapeshellarg('Laporan timestamp berhasil dibaca.').';',
                     ]);
                     $process->run();
 
@@ -337,11 +341,10 @@ class ChatbotDailyReportAnalysisTest extends TestCase
         }
     }
 
-
     public function test_requested_date_reads_timestamp_report_from_riwayat_monitoring_directory(): void
     {
         $reportDirectory = storage_path('framework/testing/daily-reports');
-        $historyDirectory = dirname($reportDirectory) . '/Riwayat Monitoring';
+        $historyDirectory = dirname($reportDirectory).'/Riwayat Monitoring';
 
         if (! is_dir($reportDirectory)) {
             mkdir($reportDirectory, 0777, true);
@@ -351,7 +354,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
             mkdir($historyDirectory, 0777, true);
         }
 
-        $reportFile = $historyDirectory . '/2026-10-20_19-12-55.md';
+        $reportFile = $historyDirectory.'/2026-10-20_19-12-55.md';
 
         file_put_contents(
             $reportFile,
@@ -379,7 +382,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 'checked_at' => now('UTC'),
             ]);
 
-            $fakeHermes = new class extends HermesRunner {
+            $fakeHermes = new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     foreach ([
@@ -390,7 +394,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     ] as $required) {
                         if (! str_contains($prompt, $required)) {
                             throw new \RuntimeException(
-                                'Prompt tidak memuat informasi laporan Riwayat Monitoring: ' . $required
+                                'Prompt tidak memuat informasi laporan Riwayat Monitoring: '.$required
                             );
                         }
                     }
@@ -400,7 +404,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg($reply) . ';',
+                        'echo '.escapeshellarg($reply).';',
                     ]);
 
                     $process->run();
@@ -435,18 +439,17 @@ class ChatbotDailyReportAnalysisTest extends TestCase
         }
     }
 
-
     public function test_comparison_between_two_dates_uses_only_requested_reports(): void
     {
         $reportDirectory = storage_path('framework/testing/comparison-reports');
-        $historyDirectory = dirname($reportDirectory) . '/Riwayat Monitoring';
+        $historyDirectory = dirname($reportDirectory).'/Riwayat Monitoring';
 
         mkdir($reportDirectory, 0777, true);
         mkdir($historyDirectory, 0777, true);
 
-        $report20 = $reportDirectory . '/2026-10-20_19-12-55.md';
-        $report21 = $historyDirectory . '/2026-10-21_19-12-55.md';
-        $report22 = $reportDirectory . '/2026-10-22_19-12-55.md';
+        $report20 = $reportDirectory.'/2026-10-20_19-12-55.md';
+        $report21 = $historyDirectory.'/2026-10-21_19-12-55.md';
+        $report22 = $reportDirectory.'/2026-10-22_19-12-55.md';
 
         file_put_contents(
             $report20,
@@ -484,7 +487,8 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                 'checked_at' => now('UTC'),
             ]);
 
-            $fakeHermes = new class extends HermesRunner {
+            $fakeHermes = new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     $requiredContent = [
@@ -503,7 +507,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     foreach ($requiredContent as $required) {
                         if (! str_contains($prompt, $required)) {
                             throw new \RuntimeException(
-                                'Prompt tidak memuat informasi perbandingan: ' . $required
+                                'Prompt tidak memuat informasi perbandingan: '.$required
                             );
                         }
                     }
@@ -528,7 +532,7 @@ class ChatbotDailyReportAnalysisTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg($reply) . ';',
+                        'echo '.escapeshellarg($reply).';',
                     ]);
 
                     $process->run();
@@ -564,5 +568,4 @@ class ChatbotDailyReportAnalysisTest extends TestCase
             }
         }
     }
-
 }

@@ -18,6 +18,7 @@ class SyncRegisteredWebsites extends Command
 
         if (empty($websites)) {
             $this->error('Konfigurasi website tidak ditemukan.');
+
             return self::FAILURE;
         }
 
@@ -28,7 +29,7 @@ class SyncRegisteredWebsites extends Command
             foreach ($websites as $name => $data) {
                 $url = $data['url'] ?? null;
 
-                if (!is_string($url) || $url === '') {
+                if (! is_string($url) || $url === '') {
                     continue;
                 }
 

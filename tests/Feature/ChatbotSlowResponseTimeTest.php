@@ -36,7 +36,8 @@ class ChatbotSlowResponseTimeTest extends TestCase
             'checked_at' => now('UTC'),
         ]);
 
-        $fakeHermes = new class extends HermesRunner {
+        $fakeHermes = new class extends HermesRunner
+        {
             public function run(string $prompt): Process
             {
                 $requiredTexts = [
@@ -61,12 +62,12 @@ class ChatbotSlowResponseTimeTest extends TestCase
                 $process = new Process([
                     PHP_BINARY,
                     '-r',
-                    'echo ' . escapeshellarg(
+                    'echo '.escapeshellarg(
                         'FAKTA MONITORING: Google berstatus NORMAL dengan response time 4.500 detik. '
-                        . 'HIPOTESIS PENYEBAB: Performa aplikasi, database, atau jaringan mungkin memengaruhi waktu respons. '
-                        . 'REKOMENDASI PEMERIKSAAN: Periksa performa aplikasi, database, jaringan, dan penggunaan resource secara read-only. '
-                        . 'Respons lambat tidak otomatis berarti website mengalami gangguan.'
-                    ) . ';',
+                        .'HIPOTESIS PENYEBAB: Performa aplikasi, database, atau jaringan mungkin memengaruhi waktu respons. '
+                        .'REKOMENDASI PEMERIKSAAN: Periksa performa aplikasi, database, jaringan, dan penggunaan resource secara read-only. '
+                        .'Respons lambat tidak otomatis berarti website mengalami gangguan.'
+                    ).';',
                 ]);
 
                 $process->run();
@@ -88,9 +89,9 @@ class ChatbotSlowResponseTimeTest extends TestCase
             ->assertJsonPath(
                 'reply',
                 'FAKTA MONITORING: Google berstatus NORMAL dengan response time 4.500 detik. '
-                . 'HIPOTESIS PENYEBAB: Performa aplikasi, database, atau jaringan mungkin memengaruhi waktu respons. '
-                . 'REKOMENDASI PEMERIKSAAN: Periksa performa aplikasi, database, jaringan, dan penggunaan resource secara read-only. '
-                . 'Respons lambat tidak otomatis berarti website mengalami gangguan.'
+                .'HIPOTESIS PENYEBAB: Performa aplikasi, database, atau jaringan mungkin memengaruhi waktu respons. '
+                .'REKOMENDASI PEMERIKSAAN: Periksa performa aplikasi, database, jaringan, dan penggunaan resource secara read-only. '
+                .'Respons lambat tidak otomatis berarti website mengalami gangguan.'
             );
 
         $this->assertDatabaseHas('chat_messages', [

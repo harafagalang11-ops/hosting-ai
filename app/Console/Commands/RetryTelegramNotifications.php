@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Models\HostingNotification;
 use App\Services\TelegramNotificationService;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[\Illuminate\Console\Attributes\Signature('hosting:retry-telegram')]
-#[\Illuminate\Console\Attributes\Description('Mencoba kembali pengiriman notifikasi Telegram yang gagal sementara')]
+#[Signature('hosting:retry-telegram')]
+#[Description('Mencoba kembali pengiriman notifikasi Telegram yang gagal sementara')]
 class RetryTelegramNotifications extends Command
 {
     public function handle(): int

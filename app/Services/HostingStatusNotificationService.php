@@ -29,7 +29,7 @@ class HostingStatusNotificationService
 
                 $newStatus = strtoupper($newStatus);
 
-                if (!$previous || strtoupper($previous->status) === $newStatus) {
+                if (! $previous || strtoupper($previous->status) === $newStatus) {
                     return null;
                 }
 
@@ -40,7 +40,7 @@ class HostingStatusNotificationService
                     default => null,
                 };
 
-                if (!$event) {
+                if (! $event) {
                     return null;
                 }
 
@@ -57,13 +57,13 @@ class HostingStatusNotificationService
                 };
 
                 $message = $heading
-                    . "\nWebsite: {$name}"
-                    . "\nURL: {$url}"
-                    . "\nStatus: {$newStatus}"
-                    . "\nDetail: {$detail}"
-                    . "\nWaktu: " . $checkedAt->copy()
+                    ."\nWebsite: {$name}"
+                    ."\nURL: {$url}"
+                    ."\nStatus: {$newStatus}"
+                    ."\nDetail: {$detail}"
+                    ."\nWaktu: ".$checkedAt->copy()
                         ->timezone('Asia/Jakarta')
-                        ->format('d-m-Y H:i:s') . ' WIB';
+                        ->format('d-m-Y H:i:s').' WIB';
 
                 return HostingNotification::create([
                     'website_id' => $websiteId,

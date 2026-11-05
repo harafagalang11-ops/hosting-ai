@@ -56,7 +56,8 @@ class ChatbotHttpErrorAnalysisTest extends TestCase
 
         $this->app->instance(
             HermesRunner::class,
-            new class extends HermesRunner {
+            new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     foreach ([500, 502, 503] as $code) {
@@ -76,12 +77,12 @@ class ChatbotHttpErrorAnalysisTest extends TestCase
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg(
+                        'echo '.escapeshellarg(
                             'FAKTA MONITORING: Terdapat simulasi HTTP 500, 502, dan 503. '
-                            . 'HIPOTESIS PENYEBAB: Belum dapat dipastikan. '
-                            . 'REKOMENDASI PEMERIKSAAN: Periksa log aplikasi dan server '
-                            . 'serta kondisi resource server.'
-                        ) . ';',
+                            .'HIPOTESIS PENYEBAB: Belum dapat dipastikan. '
+                            .'REKOMENDASI PEMERIKSAAN: Periksa log aplikasi dan server '
+                            .'serta kondisi resource server.'
+                        ).';',
                     ]);
 
                     $process->run();
@@ -102,9 +103,9 @@ class ChatbotHttpErrorAnalysisTest extends TestCase
             ->assertJsonPath(
                 'reply',
                 'FAKTA MONITORING: Terdapat simulasi HTTP 500, 502, dan 503. '
-                . 'HIPOTESIS PENYEBAB: Belum dapat dipastikan. '
-                . 'REKOMENDASI PEMERIKSAAN: Periksa log aplikasi dan server '
-                . 'serta kondisi resource server.'
+                .'HIPOTESIS PENYEBAB: Belum dapat dipastikan. '
+                .'REKOMENDASI PEMERIKSAAN: Periksa log aplikasi dan server '
+                .'serta kondisi resource server.'
             );
     }
 }

@@ -10,17 +10,19 @@ use Throwable;
 class TelegramNotificationService
 {
     private const MAX_ATTEMPTS = 3;
+
     private const RETRY_DELAY_MINUTES = 5;
+
     private const LOCK_SECONDS = 60;
 
     public function send(HostingNotification $notification): bool
     {
         $lock = Cache::lock(
-            'telegram-notification-' . $notification->id,
+            'telegram-notification-'.$notification->id,
             self::LOCK_SECONDS
         );
 
-        if (!$lock->get()) {
+        if (! $lock->get()) {
             return false;
         }
 
@@ -48,7 +50,7 @@ class TelegramNotificationService
             $token = config('services.telegram.bot_token');
             $chatId = config('services.telegram.chat_id');
 
-            if (!$token || !$chatId) {
+            if (! $token || ! $chatId) {
                 $notification->update([
                     'telegram_error' => 'Token bot atau chat ID belum dikonfigurasi.',
                     'telegram_next_attempt_at' => null,
@@ -76,7 +78,7 @@ class TelegramNotificationService
                 $response = Http::asForm()
                     ->timeout(15)
                     ->post(
-                        'https' . '://' . 'api.telegram.org' . '/bot' . $token . '/sendMessage',
+                        'https'.'://'.'api.telegram.org'.'/bot'.$token.'/sendMessage',
                         [
                             'chat_id' => $chatId,
                             'text' => $notification->message,
@@ -95,14 +97,14 @@ class TelegramNotificationService
 
                 $status = $response->status();
                 $retryable = $status === 429 || $status >= 500;
-                $lastError = 'Telegram API gagal mengirim pesan (HTTP ' . $status . ').';
+                $lastError = 'Telegram API gagal mengirim pesan (HTTP '.$status.').';
 
                 if ($status === 429) {
                     $retryAfter = $response->json('parameters.retry_after');
                 }
             } catch (Throwable $e) {
                 $retryable = true;
-                $lastError = 'Pengiriman gagal: ' . $e->getMessage();
+                $lastError = 'Pengiriman gagal: '.$e->getMessage();
             }
 
             $nextAttemptAt = null;

@@ -3,21 +3,21 @@
 return [
     'status_path' => env(
         'HOSTING_STATUS_PATH',
-        env('HOME') . '/.hermes/state/hosting-monitor-status'
+        env('HOME').'/.hermes/state/hosting-monitor-status'
     ),
 
     'report_directory' => env(
         'HOSTING_REPORT_DIRECTORY',
-        rtrim(env('HOME', ''), '/') . '/Documents/HostingVault/Laporan Harian'
+        rtrim(env('HOME', ''), '/').'/Documents/HostingVault/Laporan Harian'
     ),
 
     'websites' => [
         'Google' => [
-            'url' => 'https' . '://' . 'google.com',
+            'url' => 'https'.'://'.'google.com',
             'file' => 'google.status',
         ],
         'GitHub' => [
-            'url' => 'https' . '://' . 'github.com',
+            'url' => 'https'.'://'.'github.com',
             'file' => 'github.status',
         ],
     ],

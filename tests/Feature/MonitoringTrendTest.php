@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Services\MonitoringTrendService;
-use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 

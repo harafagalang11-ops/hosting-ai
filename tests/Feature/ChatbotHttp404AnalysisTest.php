@@ -40,7 +40,8 @@ class ChatbotHttp404AnalysisTest extends TestCase
 
         $this->app->instance(
             HermesRunner::class,
-            new class extends HermesRunner {
+            new class extends HermesRunner
+            {
                 public function run(string $prompt): Process
                 {
                     if (! str_contains($prompt, '404')) {
@@ -62,15 +63,15 @@ class ChatbotHttp404AnalysisTest extends TestCase
                     }
 
                     $reply = 'FAKTA MONITORING: Tercatat simulasi HTTP 404. '
-                        . 'HIPOTESIS PENYEBAB: URL atau resource mungkin tidak ditemukan, '
-                        . 'tetapi penyebab belum dapat dipastikan. '
-                        . 'REKOMENDASI PEMERIKSAAN: Periksa URL, routing, '
-                        . 'dan keberadaan resource.';
+                        .'HIPOTESIS PENYEBAB: URL atau resource mungkin tidak ditemukan, '
+                        .'tetapi penyebab belum dapat dipastikan. '
+                        .'REKOMENDASI PEMERIKSAAN: Periksa URL, routing, '
+                        .'dan keberadaan resource.';
 
                     $process = new Process([
                         PHP_BINARY,
                         '-r',
-                        'echo ' . escapeshellarg($reply) . ';',
+                        'echo '.escapeshellarg($reply).';',
                     ]);
 
                     $process->run();
@@ -91,10 +92,10 @@ class ChatbotHttp404AnalysisTest extends TestCase
             ->assertJsonPath(
                 'reply',
                 'FAKTA MONITORING: Tercatat simulasi HTTP 404. '
-                . 'HIPOTESIS PENYEBAB: URL atau resource mungkin tidak ditemukan, '
-                . 'tetapi penyebab belum dapat dipastikan. '
-                . 'REKOMENDASI PEMERIKSAAN: Periksa URL, routing, '
-                . 'dan keberadaan resource.'
+                .'HIPOTESIS PENYEBAB: URL atau resource mungkin tidak ditemukan, '
+                .'tetapi penyebab belum dapat dipastikan. '
+                .'REKOMENDASI PEMERIKSAAN: Periksa URL, routing, '
+                .'dan keberadaan resource.'
             );
     }
 }
