@@ -1,0 +1,199 @@
+/* GLOBAL PAGE LAYOUT */
+.content {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 30px;
+}
+
+body > .d-flex > main,
+body > .d-flex > .container {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+}
+
+/* SHARED MODERN SAAS SIDEBAR */
+.sidebar {
+    width: 255px;
+    flex: 0 0 255px;
+    min-height: 100vh;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: #172033;
+    color: #f8fafc;
+    padding: 22px 16px !important;
+}
+
+.sidebar-brand {
+    padding: 4px 0 10px;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 4px 25px;
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar-logo {
+    display: block;
+    width: 48px;
+    height: 48px;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.brand-caption {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+}
+
+.brand-caption strong {
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.brand-caption small,
+.sidebar-user-info small {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.sidebar-section-label {
+    padding: 17px 12px 9px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 13px;
+    color: #cbd5e1;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: .2s ease;
+}
+
+.sidebar-nav a i {
+    width: 20px;
+    font-size: 17px;
+    text-align: center;
+}
+
+.sidebar-nav a:hover {
+    background: #26344c;
+    color: white;
+}
+
+.sidebar-nav a.active {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, .2);
+}
+
+/* SIDEBAR USER AND LOGOUT */
+.sidebar-bottom {
+    margin-top: auto;
+    padding-top: 25px;
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 8px;
+    margin-bottom: 10px;
+    border-top: 1px solid #334155;
+}
+
+.sidebar-avatar {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #334155;
+    font-size: 17px;
+}
+
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sidebar-user-info strong {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    background: transparent;
+    color: #cbd5e1;
+    font-size: 14px;
+    transition: .2s;
+}
+
+.sidebar-logout:hover {
+    border-color: #7f1d1d;
+    background: #7f1d1d;
+    color: white;
+}
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+    .sidebar {
+        width: 190px;
+        flex-basis: 190px;
+        padding: 15px 10px !important;
+    }
+
+    .sidebar-logo {
+        width: 38px;
+        height: 38px;
+    }
+
+    .sidebar-nav a {
+        gap: 8px;
+        padding: 11px 8px;
+        font-size: 12px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    body > .d-flex > main,
+    body > .d-flex > .container {
+        padding: 20px 15px !important;
+    }
+}

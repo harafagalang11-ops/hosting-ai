@@ -1,0 +1,69 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Local environment backups
+.env.*
+!.env.example
+
+# Local databases
+/database/*.sqlite
+/database/*.sqlite-*
+/database/*.db
+
+# Local backups
+/backup/
+/backup-redesign-*/
+
+# Local test cache
+/.phpunit.result.cache
+
+# Runtime files
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!/storage/**/.gitignore
+
+# Database backups
+/database/*.bak
+/database/*.sqlite.bak
+
+# Migration backups
+/database/migrations/*.php.bak
+
+# Temporary files
+/=
+
+# Backup files - keep only active source files
+*.bak
+*.bak-*
+*.backup
+*.backup-*
+*.backup_*
+*.php.bak
+*.php.backup
