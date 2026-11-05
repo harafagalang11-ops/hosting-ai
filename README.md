@@ -1,58 +1,138 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hosting AI
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web berbasis Laravel untuk membantu pemantauan website/hosting, pencatatan riwayat pemeriksaan, analisis kondisi monitoring melalui chatbot, dan pengiriman notifikasi.
 
-## About Laravel
+> **Status proyek:** Dalam tahap pengembangan. Integrasi dengan panel/API hosting pihak ketiga belum diklaim tersedia; konfigurasi dan akses layanan eksternal perlu disesuaikan dengan lingkungan pengguna.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Dashboard monitoring** untuk melihat ringkasan kondisi website yang terdaftar.
+- **Pemeriksaan website terjadwal** dan pencatatan hasil pemeriksaan ke database.
+- **Riwayat monitoring** untuk meninjau hasil pemeriksaan sebelumnya.
+- **Chatbot analisis** untuk membantu menjelaskan hasil monitoring dan pertanyaan seputar hosting berdasarkan data aplikasi.
+- **Notifikasi Telegram** untuk menyampaikan perubahan status monitoring, termasuk mekanisme percobaan ulang ketika pengiriman gagal.
+- **Laporan harian** yang dijadwalkan pada pukul 20.30 WIB.
+- **Integrasi Hermes** melalui perintah lokal, jika Hermes Agent telah terpasang dan dikonfigurasi pada server aplikasi.
+- **Pengelolaan website, profil, dan preferensi tampilan** melalui antarmuka aplikasi.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Teknologi
 
-## Learning Laravel
+- PHP 8.3 atau lebih baru
+- Laravel 13
+- SQLite (konfigurasi awal) atau database lain yang didukung Laravel dan telah dikonfigurasi
+- Composer
+- Node.js dan npm
+- Vite
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Persyaratan
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Pastikan perangkat pengembangan telah memiliki:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- PHP >= 8.3 beserta ekstensi yang dibutuhkan Laravel
+- Composer
+- Node.js dan npm
+- Database yang sesuai dengan konfigurasi aplikasi
 
-## Agentic Development
+## Instalasi lokal
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. Clone repository:
+
+   ```bash
+   git clone https://github.com/harafagalang11-ops/hosting-ai.git
+   cd hosting-ai
+   ```
+
+2. Instal dependensi PHP:
+
+   ```bash
+   composer install
+   ```
+
+3. Buat file environment:
+
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. Siapkan database. Untuk konfigurasi SQLite bawaan:
+
+   ```bash
+   touch database/database.sqlite
+   ```
+
+   Pastikan bagian database di file `.env` menggunakan:
+
+   ```env
+   DB_CONNECTION=sqlite
+   ```
+
+   Jalankan migrasi:
+
+   ```bash
+   php artisan migrate
+   ```
+
+5. Instal dependensi frontend dan build aset:
+
+   ```bash
+   npm install --ignore-scripts
+   npm run build
+   ```
+
+6. Jalankan aplikasi:
+
+   ```bash
+   php artisan serve
+   ```
+
+   Buka alamat lokal yang ditampilkan oleh Artisan (umumnya http://127.0.0.1:8000).
+
+## Menjalankan scheduler
+
+Aplikasi menggunakan Laravel Scheduler untuk menjalankan pekerjaan monitoring, laporan harian, dan percobaan ulang notifikasi Telegram.
+
+Jadwal yang didefinisikan:
+
+| Pekerjaan | Jadwal |
+|---|---|
+| Refresh monitoring | Setiap 3 jam |
+| Laporan harian | Setiap hari pukul 20.30 WIB |
+| Percobaan ulang notifikasi Telegram | Setiap 5 menit |
+
+Untuk pengujian lokal, jalankan scheduler:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan schedule:work
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Pada server Linux, Laravel Scheduler perlu dipanggil secara berkala melalui cron sesuai dokumentasi Laravel.
 
-## Contributing
+## Konfigurasi layanan opsional
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Atur nilai yang diperlukan melalui file `.env`. Jangan menaruh token, password, API key, atau kredensial pribadi ke dalam source code maupun repository.
 
-## Code of Conduct
+- **Telegram:** isi konfigurasi bot token dan chat ID sesuai variabel yang dibaca oleh `config/services.php`.
+- **Hermes Agent:** Hermes harus terpasang pada mesin yang menjalankan aplikasi. Atur variabel `HERMES_EXECUTABLE` pada `.env` jika executable tidak tersedia melalui `PATH` (contoh: `HERMES_EXECUTABLE=/path/ke/hermes`).
+- **Direktori laporan dan status monitoring:** sesuaikan konfigurasi pada `config/hosting.php` dengan lokasi penyimpanan yang tersedia.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Jangan gunakan kredensial produksi pada lingkungan pengembangan. Gunakan akun dan layanan uji sampai konfigurasi operasional telah diverifikasi.
 
-## Security Vulnerabilities
+## Pengujian
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Jalankan automated test dengan:
 
-## License
+```bash
+php artisan test
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Keamanan
+
+- File `.env`, database lokal, log, cache, dan file backup diabaikan oleh Git melalui `.gitignore`.
+- Gunakan `.env.example` sebagai template konfigurasi tanpa memasukkan kredensial asli.
+- Sebelum deployment atau publikasi, periksa kembali source code, riwayat commit, screenshot, dan konfigurasi agar tidak memuat rahasia atau data operasional.
+- Aplikasi ini merupakan alat bantu monitoring. Status HTTP saja tidak membuktikan seluruh komponen aplikasi, database, atau layanan hosting dalam keadaan sehat.
+
+## Lisensi
+
+Lisensi proyek belum ditetapkan secara khusus. Hubungi pemilik repository sebelum menggunakan atau mendistribusikan ulang kode ini.
