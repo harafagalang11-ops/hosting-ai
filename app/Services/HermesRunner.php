@@ -9,7 +9,7 @@ class HermesRunner
     public function run(string $prompt): Process
     {
         $process = new Process([
-            '/Users/macbee/.local/bin/hermes',
+            config('hosting.hermes_binary', 'hermes'),
             '--safe-mode',
             '-z',
             $prompt,
