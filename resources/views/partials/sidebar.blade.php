@@ -27,7 +27,15 @@
                 <i class="bi bi-globe2"></i>
                 <span>Manajemen Website</span>
             </a>
-            <a href="/notifications" class="{{ request()->is('notifications*') ? 'active' : '' }}">
+            <a href="{{ route('migration.index') }}" class="{{ request()->is('migrasi*') ? 'active' : '' }}">
+            <i class="bi bi-arrow-left-right"></i>
+            <span>Migrasi Hosting</span>
+        </a>
+        <a href="{{ route('migration-endpoints.index') }}" class="{{ request()->is('kelola-hosting*') ? 'active' : '' }}">
+            <i class="bi bi-hdd-network"></i>
+            <span>Kelola Hosting</span>
+        </a>
+        <a href="/notifications" class="{{ request()->is('notifications*') ? 'active' : '' }}">
             <i class="bi bi-bell"></i>
             <span>Notifikasi</span>
         </a>

@@ -67,3 +67,5 @@ Thumbs.db
 *.backup_*
 *.php.bak
 *.php.backup
+
+*.bak_*

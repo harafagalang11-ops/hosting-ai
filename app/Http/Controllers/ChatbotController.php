@@ -38,7 +38,8 @@ class ChatbotController extends Controller
         ]);
 
         // Daftar website aktif berasal dari database.
-        $websites = Website::where('is_active', true)
+        $websites = auth()->user()->websites()
+            ->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -52,11 +53,17 @@ class ChatbotController extends Controller
         });
 
         if ($refreshNeeded) {
-            $refresh = new Process([
+            $refreshCommand = [
                 PHP_BINARY,
                 base_path('artisan'),
                 'hosting:refresh-monitoring',
-            ]);
+            ];
+
+            foreach ($websites as $website) {
+                $refreshCommand[] = '--website-id='.$website->id;
+            }
+
+            $refresh = new Process($refreshCommand);
 
             $refresh->setTimeout(60);
             $refresh->run();
@@ -146,10 +153,13 @@ class ChatbotController extends Controller
             ];
         }
 
-        // Rekap seluruh riwayat; website_id NULL tetap menjadi data simulasi/lainnya.
+        // Rekap riwayat hanya untuk website milik pengguna yang sedang login.
         $summaryRows = MonitoringLog::selectRaw(
             'website_id, website_name, status, COUNT(*) as total'
         )
+            ->whereHas('website', function ($query) {
+                $query->withTrashed()->where('user_id', auth()->id());
+            })
             ->groupBy('website_id', 'website_name', 'status')
             ->orderBy('website_name')
             ->get();
@@ -184,10 +194,12 @@ class ChatbotController extends Controller
             ->values()
             ->toArray();
 
-        // Pemeriksaan terakhir untuk setiap website aktual, termasuk riwayat website nonaktif.
+        // Pemeriksaan terakhir website milik pengguna, termasuk website nonaktif/terhapus.
         $latestData = [];
 
-        $actualWebsiteIds = MonitoringLog::whereNotNull('website_id')
+        $actualWebsiteIds = MonitoringLog::whereHas('website', function ($query) {
+            $query->withTrashed()->where('user_id', auth()->id());
+        })
             ->distinct()
             ->orderBy('website_id')
             ->pluck('website_id');
@@ -214,37 +226,11 @@ class ChatbotController extends Controller
             }
         }
 
-        // Pemeriksaan terakhir data simulasi/lainnya.
-        $simulationNames = MonitoringLog::whereNull('website_id')
-            ->distinct()
-            ->orderBy('website_name')
-            ->pluck('website_name');
-
-        foreach ($simulationNames as $name) {
-            $log = MonitoringLog::whereNull('website_id')
-                ->where('website_name', $name)
-                ->latest('checked_at')
-                ->first([
-                    'website_id', 'website_name', 'website_url', 'status',
-                    'http_code', 'response_time', 'detail', 'checked_at',
-                ]);
-
-            if ($log) {
-                $data = $log->toArray();
-                $data['kategori'] = 'DATA SIMULASI/LAINNYA';
-
-                if (! empty($data['checked_at'])) {
-                    $data['checked_at'] = $log->checked_at
-                        ->timezone('Asia/Jakarta')
-                        ->format('Y-m-d H:i:s').' WIB';
-                }
-
-                $latestData[] = $data;
-            }
-        }
-
-        // Seluruh catatan WARNING dan GANGGUAN, dengan kategori berdasarkan website_id.
+        // Catatan WARNING dan GANGGUAN hanya dari website milik pengguna.
         $incidentLogs = MonitoringLog::whereIn('status', ['WARNING', 'GANGGUAN'])
+            ->whereHas('website', function ($query) {
+                $query->withTrashed()->where('user_id', auth()->id());
+            })
             ->orderBy('checked_at')
             ->get([
                 'website_id', 'website_name', 'website_url', 'status',
@@ -273,7 +259,7 @@ class ChatbotController extends Controller
             'ANALISIS TREN RESPONSE TIME' => $trendData,
             'DETEKSI LONJAKAN RESPONSE TIME' => $spikeData,
             'SELURUH RIWAYAT WARNING DAN GANGGUAN' => $incidentData,
-            'ATURAN KATEGORI' => 'Data dengan website_id terisi merupakan monitoring aktual dari website terdaftar. Data dengan website_id NULL merupakan data simulasi/lainnya. Jangan menggabungkan kedua kategori.',
+            'ATURAN KATEGORI' => 'Konteks ini hanya memuat monitoring website milik pengguna yang sedang login. Data simulasi tanpa pemilik (website_id NULL) tidak disertakan.',
         ];
 
         // Ambil 10 pesan sebelumnya tanpa menggandakan pesan terbaru.

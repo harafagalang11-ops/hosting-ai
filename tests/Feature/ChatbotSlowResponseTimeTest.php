@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\MonitoringLog;
+use App\Models\Website;
 use App\Models\User;
 use App\Services\HermesRunner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +26,15 @@ class ChatbotSlowResponseTimeTest extends TestCase
             'hosting.report_directory' => storage_path('framework/testing/no-real-reports'),
         ]);
 
-        MonitoringLog::create([
+        $user = User::factory()->create();
+
+        $website = $user->websites()->create([
+            'name' => 'Google',
+            'url' => 'https://example.test',
+            'is_active' => true,
+        ]);
+
+        $website->monitoringLogs()->create([
             'website_name' => 'Google',
             'website_url' => 'https://example.test',
             'status' => 'NORMAL',
@@ -77,8 +85,6 @@ class ChatbotSlowResponseTimeTest extends TestCase
         };
 
         $this->app->instance(HermesRunner::class, $fakeHermes);
-
-        $user = User::factory()->create();
 
         $response = $this->actingAs($user)->postJson('/chatbot/send', [
             'message' => 'Analisis response time Google.',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Website;
+use App\Models\MigrationEndpoint;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -11,29 +12,41 @@ class WebsiteController extends Controller
 {
     public function index()
     {
-        $websites = Website::withCount('monitoringLogs')
+        $websites = auth()->user()->websites()
+            ->withCount('monitoringLogs')
             ->orderBy('name')
             ->get();
 
-        return view('websites.index', compact('websites'));
+        $hostingEndpoints = MigrationEndpoint::where('user_id', auth()->id())
+            ->orderBy('name')
+            ->get(['id', 'name', 'host']);
+
+        return view('websites.index', compact('websites', 'hostingEndpoints'));
     }
 
     public function edit(Website $website)
     {
-        $websites = Website::withCount('monitoringLogs')
+        $website = auth()->user()->websites()->findOrFail($website->id);
+
+        $websites = auth()->user()->websites()
+            ->withCount('monitoringLogs')
             ->orderBy('name')
             ->get();
 
+        $hostingEndpoints = MigrationEndpoint::where('user_id', auth()->id())
+            ->orderBy('name')
+            ->get(['id', 'name', 'host']);
+
         $editing = $website;
 
-        return view('websites.index', compact('websites', 'editing'));
+        return view('websites.index', compact('websites', 'editing', 'hostingEndpoints'));
     }
 
     public function store(Request $request)
     {
         $data = $this->validatedData($request);
 
-        Website::create($data);
+        auth()->user()->websites()->create($data);
 
         return redirect()->route('websites.index')
             ->with('success', 'Website berhasil ditambahkan.');
@@ -41,6 +54,8 @@ class WebsiteController extends Controller
 
     public function update(Request $request, Website $website)
     {
+        $website = auth()->user()->websites()->findOrFail($website->id);
+
         $data = $this->validatedData($request, $website);
 
         $website->update($data);
@@ -51,13 +66,19 @@ class WebsiteController extends Controller
 
     public function toggle(Website $website)
     {
-        $website->update(['is_active' => ! $website->is_active]);
+        $website = auth()->user()->websites()->findOrFail($website->id);
+
+        $website->update([
+            'is_active' => ! $website->is_active,
+        ]);
 
         return back()->with('success', 'Status website berhasil diperbarui.');
     }
 
     public function destroy(Website $website)
     {
+        $website = auth()->user()->websites()->findOrFail($website->id);
+
         $website->delete();
 
         return redirect()->route('websites.index')
@@ -68,6 +89,7 @@ class WebsiteController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+
             'url' => [
                 'required',
                 'string',
@@ -75,19 +97,49 @@ class WebsiteController extends Controller
                 'url',
                 Rule::unique('websites', 'url')->ignore($website?->id),
             ],
+
+            'migration_endpoint_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('migration_endpoints', 'id')
+                    ->where(fn ($query) => $query->where('user_id', auth()->id())),
+            ],
+            'document_root' => [
+                'nullable',
+                'string',
+                'max:2048',
+                function ($attribute, $value, $fail) {
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+
+                    if (
+                        ! str_starts_with($value, '/') ||
+                        $value === '/' ||
+                        str_contains($value, '//') ||
+                        str_contains($value, chr(92)) ||
+                        preg_match('/[\\x00-\\x1F\\x7F]/', $value) ||
+                        preg_match('#(^|/)\\.{1,2}(/|$)#', $value)
+                    ) {
+                        $fail('Direktori harus berupa path absolut Linux yang aman, contoh: /home/user/public_html.');
+                    }
+                },
+            ],
         ]);
 
         $parts = parse_url($data['url']);
         $scheme = strtolower($parts['scheme'] ?? '');
         $host = strtolower(rtrim($parts['host'] ?? '', '.'));
 
-        if (! in_array($scheme, ['http', 'https'], true) ||
+        if (
+            ! in_array($scheme, ['http', 'https'], true) ||
             $host === '' ||
             in_array($host, ['localhost'], true) ||
             str_ends_with($host, '.localhost') ||
             str_ends_with($host, '.local') ||
             str_ends_with($host, '.internal') ||
-            str_ends_with($host, '.test')) {
+            str_ends_with($host, '.test')
+        ) {
             throw ValidationException::withMessages([
                 'url' => 'Gunakan URL HTTP/HTTPS dengan domain publik yang valid.',
             ]);

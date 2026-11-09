@@ -11,15 +11,23 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-#[Signature('hosting:refresh-monitoring')]
+#[Signature('hosting:refresh-monitoring {--website-id=* : ID website yang akan diperiksa}')]
 #[Description('Memeriksa semua website aktif yang terdaftar')]
 class RefreshHostingMonitoring extends Command
 {
     public function handle(): int
     {
-        $websites = Website::where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        $websiteIds = $this->option('website-id');
+
+        $websiteQuery = Website::where('is_active', true);
+
+        // Tanpa opsi, monitoring terjadwal tetap memeriksa semua website aktif.
+        // Dengan opsi, pemeriksaan dibatasi pada ID website yang diberikan.
+        if (! empty($websiteIds)) {
+            $websiteQuery->whereIn('id', $websiteIds);
+        }
+
+        $websites = $websiteQuery->orderBy('name')->get();
 
         if ($websites->isEmpty()) {
             $this->warn('Tidak ada website aktif untuk diperiksa.');

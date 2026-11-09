@@ -7,24 +7,27 @@ use Illuminate\Http\Request;
 
 class HistoryController extends Controller
 {
+    private function ownedLogs()
+    {
+        return MonitoringLog::whereHas('website', function ($query) {
+            $query->withTrashed()
+                ->where('user_id', auth()->id());
+        });
+    }
+
     public function destroy($id)
     {
-        $log = MonitoringLog::findOrFail($id);
-        $log->delete();
+        $this->ownedLogs()->findOrFail($id)->delete();
 
-        return redirect('/riwayat')->with(
-            'success',
-            'Riwayat monitoring berhasil dihapus.'
-        );
+        return redirect('/riwayat')
+            ->with('success', 'Riwayat monitoring berhasil dihapus.');
     }
 
     public function destroyAll(Request $request)
     {
-        MonitoringLog::query()->delete();
+        $this->ownedLogs()->delete();
 
-        return redirect('/riwayat')->with(
-            'success',
-            'Seluruh riwayat monitoring berhasil dihapus.'
-        );
+        return redirect('/riwayat')
+            ->with('success', 'Seluruh riwayat monitoring milik Anda berhasil dihapus.');
     }
 }

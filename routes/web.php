@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\MigrationController;
+use App\Http\Controllers\MigrationEndpointController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
@@ -46,7 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', function () {
-        $websites = Website::where('is_active', true)
+        $websites = auth()->user()->websites()->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -179,7 +181,7 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::get('/monitoring', function () {
-        $websites = Website::where('is_active', true)
+        $websites = auth()->user()->websites()->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -216,14 +218,25 @@ Route::middleware('auth')->group(function () {
     })->name('monitoring');
 
     Route::post('/monitoring/check', function () {
-        $exitCode = Artisan::call('hosting:refresh-monitoring');
+        $websites = auth()->user()->websites()->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        if ($websites->isEmpty()) {
+            return redirect()->route('monitoring')
+                ->with('success', 'Tidak ada website aktif milik akun Anda untuk diperiksa.');
+        }
+
+        $exitCode = Artisan::call('hosting:refresh-monitoring', [
+            '--website-id' => $websites->modelKeys(),
+        ]);
 
         if ($exitCode !== 0) {
             return redirect()->route('monitoring')
                 ->with('error', 'Pemeriksaan monitoring gagal dijalankan.');
         }
 
-        $websites = Website::where('is_active', true)
+        $websites = auth()->user()->websites()->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -252,6 +265,26 @@ Route::middleware('auth')->group(function () {
             ->with('success', 'Pemeriksaan website aktif selesai dan hasilnya tersimpan.');
     })->name('monitoring.check');
 
+    Route::get('/migrasi', [MigrationController::class, 'index'])->name('migration.index');
+    Route::post('/migrasi/jalankan', [MigrationController::class, 'run'])
+        ->name('migration.run');
+
+    Route::get('/kelola-hosting', [MigrationEndpointController::class, 'index'])
+        ->name('migration-endpoints.index');
+    Route::post('/kelola-hosting', [MigrationEndpointController::class, 'store'])
+        ->name('migration-endpoints.store');
+    Route::get('/kelola-hosting/{id}/files', [MigrationEndpointController::class, 'browseFiles'])
+        ->whereNumber('id')->name('migration-endpoints.files');
+    Route::get('/kelola-hosting/{id}/inventory', [MigrationEndpointController::class, 'inventory'])
+        ->whereNumber('id')->name('migration-endpoints.inventory');
+    Route::get('/kelola-hosting/{id}/edit', [MigrationEndpointController::class, 'edit'])
+        ->whereNumber('id')->name('migration-endpoints.edit');
+    Route::put('/kelola-hosting/{id}', [MigrationEndpointController::class, 'update'])
+        ->whereNumber('id')->name('migration-endpoints.update');
+    Route::post('/kelola-hosting/{id}/test-connection', [MigrationEndpointController::class, 'testConnection'])
+        ->whereNumber('id')->name('migration-endpoints.test-connection');
+    Route::delete('/kelola-hosting/{id}', [MigrationEndpointController::class, 'destroy'])
+        ->whereNumber('id')->name('migration-endpoints.destroy');
     Route::get('/chatbot', [ChatbotController::class, 'index'])
         ->name('chatbot');
 
@@ -261,7 +294,9 @@ Route::middleware('auth')->group(function () {
         ->name('chatbot.clear');
 
     Route::get('/riwayat', function () {
-        $logs = MonitoringLog::latest('checked_at')->paginate(20);
+        $logs = MonitoringLog::whereHas('website', function ($query) {
+            $query->withTrashed()->where('user_id', auth()->id());
+        })->latest('checked_at')->paginate(20);
 
         return view('history', compact('logs'));
     })->name('history');

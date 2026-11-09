@@ -60,8 +60,23 @@
                         <input type="text" name="name" class="form-control" placeholder="Contoh: Website Perusahaan" value="{{ old('name') }}" required maxlength="255">
                     </div>
                     <div class="col-md-5">
+                        <label class="form-label">Hosting</label>
+                        <select name="migration_endpoint_id" class="form-select">
+                            <option value="">Belum ditentukan</option>
+                            @foreach($hostingEndpoints as $endpoint)
+                                <option value="{{ $endpoint->id }}" @selected(old('migration_endpoint_id') == $endpoint->id)>
+                                    {{ $endpoint->name }} ({{ $endpoint->host }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-5">
                         <label class="form-label">URL Website</label>
                         <input type="url" name="url" class="form-control" placeholder="https://contoh.com" value="{{ old('url') }}" required maxlength="2048">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Document Root Hosting (Opsional)</label>
+                        <input type="text" name="document_root" class="form-control" placeholder="/home/username/public_html" value="{{ old('document_root') }}" maxlength="2048">
                     </div>
                     <div class="col-md-2">
                         <button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg me-1"></i>Tambah</button>
@@ -129,8 +144,23 @@
                             <input type="text" name="name" class="form-control" value="{{ old('name',$editing->name) }}" required maxlength="255">
                         </div>
                         <div class="col-md-5">
+                            <label class="form-label">Hosting</label>
+                            <select name="migration_endpoint_id" class="form-select">
+                                <option value="">Belum ditentukan</option>
+                                @foreach($hostingEndpoints as $endpoint)
+                                    <option value="{{ $endpoint->id }}" @selected(old('migration_endpoint_id', $editing->migration_endpoint_id) == $endpoint->id)>
+                                        {{ $endpoint->name }} ({{ $endpoint->host }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-5">
                             <label class="form-label">URL Website</label>
                             <input type="url" name="url" class="form-control" value="{{ old('url',$editing->url) }}" required maxlength="2048">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Document Root Hosting (Opsional)</label>
+                            <input type="text" name="document_root" class="form-control" placeholder="/home/username/public_html" value="{{ old('document_root', $editing->document_root) }}" maxlength="2048">
                         </div>
                         <div class="col-md-2 d-flex gap-2">
                             <button class="btn btn-primary" type="submit">Simpan</button>

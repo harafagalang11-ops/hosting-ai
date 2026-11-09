@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\HostingNotification;
 use App\Models\MonitoringLog;
 use App\Models\Website;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
@@ -44,7 +45,10 @@ class HostingDailyReportTelegramTest extends TestCase
 
     private function createMonitoringData(): void
     {
+        $user = User::factory()->create();
+
         $website = Website::create([
+            'user_id' => $user->id,
             'name' => 'Website Test',
             'url' => 'https://example.com',
             'is_active' => true,

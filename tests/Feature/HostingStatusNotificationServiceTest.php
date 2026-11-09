@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\HostingNotification;
 use App\Models\MonitoringLog;
 use App\Models\Website;
+use App\Models\User;
 use App\Services\HostingStatusNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -30,7 +31,10 @@ class HostingStatusNotificationServiceTest extends TestCase
 
     private function createWebsite(): Website
     {
+        $user = User::factory()->create();
+
         return Website::create([
+            'user_id' => $user->id,
             'name' => 'Website Test',
             'url' => 'https://example.com',
             'is_active' => true,

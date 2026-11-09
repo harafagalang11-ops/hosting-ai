@@ -27,7 +27,9 @@ class ChatbotEndpointTest extends TestCase
             'hosting.report_directory' => storage_path('framework/testing/no-real-reports'),
         ]);
 
-        $website = Website::create([
+        $user = User::factory()->create();
+
+        $website = $user->websites()->create([
             'name' => 'Google',
             'url' => 'https://example.test',
             'is_active' => true,
@@ -67,8 +69,6 @@ class ChatbotEndpointTest extends TestCase
                 }
             }
         );
-
-        $user = User::factory()->create();
 
         $response = $this->actingAs($user)->postJson('/chatbot/send', [
             'message' => 'Tolong analisis tren response time.',
