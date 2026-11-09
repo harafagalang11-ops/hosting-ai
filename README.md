@@ -136,3 +136,19 @@ php artisan test
 ## Lisensi
 
 Lisensi proyek belum ditetapkan secara khusus. Hubungi pemilik repository sebelum menggunakan atau mendistribusikan ulang kode ini.
+
+
+## Keamanan Pembacaan Laporan Obsidian
+
+Chatbot menerapkan beberapa lapisan perlindungan ketika membaca laporan Markdown dari Obsidian:
+
+- Hanya membaca file dari direktori laporan yang diizinkan.
+- Menolak symbolic link dan file yang bukan file reguler.
+- Memeriksa ukuran file maksimum 1 MB.
+- Memverifikasi identitas file melalui device dan inode sebelum membaca.
+- Membatasi pembacaan hingga 32.000 byte atau maksimal 8.000 karakter.
+- Membatasi jumlah laporan yang diproses dalam satu permintaan hingga 7 file.
+- Memperlakukan seluruh isi laporan sebagai data tidak tepercaya, bukan instruksi yang boleh diikuti AI.
+- Mengabaikan instruksi di dalam laporan yang meminta pengungkapan kredensial, eksekusi perintah, akses server, atau perubahan konfigurasi.
+
+Perlindungan prompt injection merupakan lapisan mitigasi tambahan dan bukan jaminan mutlak terhadap seluruh serangan.

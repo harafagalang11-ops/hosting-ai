@@ -40,7 +40,7 @@ if (! function_exists('getHostingMonitoring')) {
 
 // Route publik
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login')->name('login.submit');
 
 // Route yang memerlukan login
 Route::middleware('auth')->group(function () {
