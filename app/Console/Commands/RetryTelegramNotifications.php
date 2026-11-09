@@ -21,7 +21,7 @@ class RetryTelegramNotifications extends Command
             ->whereNotNull('telegram_error')
             ->whereNotNull('telegram_next_attempt_at')
             ->where('telegram_next_attempt_at', '<=', now())
-            ->where('telegram_attempts', '<', 3)
+            ->where('telegram_attempts', '<', TelegramNotificationService::MAX_ATTEMPTS)
             ->orderBy('id')
             ->chunkById(100, function ($notifications) use (&$checked) {
                 foreach ($notifications as $notification) {

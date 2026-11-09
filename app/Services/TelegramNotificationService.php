@@ -9,11 +9,19 @@ use Throwable;
 
 class TelegramNotificationService
 {
-    private const MAX_ATTEMPTS = 3;
+    public const MAX_ATTEMPTS = 3;
 
     private const RETRY_DELAY_MINUTES = 5;
 
     private const LOCK_SECONDS = 60;
+
+    private const CONFIGURATION_ERROR =
+        'Token bot atau chat ID belum dikonfigurasi.';
+
+    private const IN_PROGRESS_ERROR =
+        'Pengiriman Telegram belum terkonfirmasi; menunggu pemulihan.';
+
+    private const IN_PROGRESS_LEASE_MINUTES = 2;
 
     public function send(HostingNotification $notification): bool
     {
@@ -37,8 +45,13 @@ class TelegramNotificationService
                 return false;
             }
 
+            $isConfigurationError =
+                $notification->telegram_error === self::CONFIGURATION_ERROR
+                && $notification->telegram_next_attempt_at === null;
+
             if (
                 $notification->telegram_error !== null
+                && ! $isConfigurationError
                 && (
                     $notification->telegram_next_attempt_at === null
                     || $notification->telegram_next_attempt_at->isFuture()
@@ -52,8 +65,8 @@ class TelegramNotificationService
 
             if (! $token || ! $chatId) {
                 $notification->update([
-                    'telegram_error' => 'Token bot atau chat ID belum dikonfigurasi.',
-                    'telegram_next_attempt_at' => null,
+                    'telegram_error' => self::CONFIGURATION_ERROR,
+                    'telegram_next_attempt_at' => now()->addMinutes(self::RETRY_DELAY_MINUTES),
                 ]);
 
                 return false;
@@ -67,7 +80,10 @@ class TelegramNotificationService
 
             $notification->update([
                 'telegram_attempts' => $attempt,
-                'telegram_next_attempt_at' => null,
+                'telegram_error' => self::IN_PROGRESS_ERROR,
+                'telegram_next_attempt_at' => now()->addMinutes(
+                    self::IN_PROGRESS_LEASE_MINUTES
+                ),
             ]);
 
             $retryable = false;
@@ -102,9 +118,9 @@ class TelegramNotificationService
                 if ($status === 429) {
                     $retryAfter = $response->json('parameters.retry_after');
                 }
-            } catch (Throwable $e) {
+            } catch (Throwable) {
                 $retryable = true;
-                $lastError = 'Pengiriman gagal: '.$e->getMessage();
+                $lastError = 'Koneksi ke Telegram gagal atau waktu tunggu habis.';
             }
 
             $nextAttemptAt = null;
